@@ -1,7 +1,5 @@
+import AuthGate from "@/app/auth-gate";
+
 export default function Home() {
-  return (
-    <main>
-      <div>Hello world!</div>
-    </main>
-  );
+  return <AuthGate />;
 }
