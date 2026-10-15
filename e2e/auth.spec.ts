@@ -1,12 +1,34 @@
 import { expect, test } from "@playwright/test";
 import { createLocalAccount, LOCAL_TEST_PASSWORD } from "./local-account";
 
+test("signs in with the default local administrator account", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "帳號或電子郵件" }).fill("admin");
+  await page.getByLabel("密碼").fill("admin");
+  await page.getByRole("button", { name: "登入", exact: true }).click();
+
+  await expect(page.getByRole("heading", { name: "全部筆記" })).toBeVisible();
+  await expect(page.getByText("管理員", { exact: true }).first()).toBeVisible();
+});
+
+test("opens the admin panel and displays account details", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "帳號或電子郵件" }).fill("admin");
+  await page.getByLabel("密碼").fill("admin");
+  await page.getByRole("button", { name: "登入", exact: true }).click();
+
+  await page.getByRole("button", { name: "管理使用者" }).click();
+  await expect(page.getByRole("heading", { name: "帳號與權限" })).toBeVisible();
+  await expect(page.getByText("admin", { exact: true })).toBeVisible();
+  await expect(page.getByText(/建立於/).first()).toBeVisible();
+});
+
 test("registers a local account, persists its session, and allows login again", async ({ page }) => {
   const email = await createLocalAccount(page);
   await page.getByRole("button", { name: "登出" }).click();
 
   await expect(page.getByRole("heading", { name: "歡迎回來" })).toBeVisible();
-  await page.getByRole("textbox", { name: "電子郵件" }).fill(email);
+  await page.getByRole("textbox", { name: "帳號或電子郵件" }).fill(email);
   await page.getByLabel("密碼").fill(LOCAL_TEST_PASSWORD);
   await page.getByRole("button", { name: "登入", exact: true }).click();
 
@@ -16,7 +38,7 @@ test("registers a local account, persists its session, and allows login again", 
 
 test("shows a clear error for invalid local account credentials", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("textbox", { name: "電子郵件" }).fill("missing@example.test");
+  await page.getByRole("textbox", { name: "帳號或電子郵件" }).fill("missing@example.test");
   await page.getByLabel("密碼").fill(LOCAL_TEST_PASSWORD);
   await page.getByRole("button", { name: "登入", exact: true }).click();
 

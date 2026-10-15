@@ -75,20 +75,20 @@ export default function AuthScreen({
         <h1 id="auth-title">{mode === "signup" ? "建立本機帳號" : "歡迎回來"}</h1>
         <p className="auth-description">
           {mode === "signup"
-            ? "建立帳號後，筆記會保存在這台電腦的資料庫中。第一個帳號會成為管理員。"
+            ? "建立帳號後，筆記會保存在這台電腦的資料庫中。"
             : "登入後即可開啟儲存在這台電腦的個人筆記。"}
         </p>
 
         <form className="auth-form" onSubmit={submit}>
           <label>
-            電子郵件
+            {mode === "signup" ? "電子郵件" : "帳號或電子郵件"}
             <input
-              autoComplete="email"
+              autoComplete={mode === "signup" ? "email" : "username"}
               name="email"
-              type="email"
+              type={mode === "signup" ? "email" : "text"}
               required
               maxLength={254}
-              placeholder="name@example.com"
+              placeholder={mode === "signup" ? "name@example.com" : "admin 或 name@example.com"}
             />
           </label>
           <label>
@@ -97,7 +97,7 @@ export default function AuthScreen({
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               name="password"
               type="password"
-              minLength={8}
+              minLength={mode === "signup" ? 8 : undefined}
               maxLength={128}
               required
               placeholder={mode === "signup" ? "至少 8 個字元" : "輸入密碼"}

@@ -4,6 +4,7 @@ import {
   listLocalUsers,
   updateLocalUserRole,
 } from "@/lib/local-db";
+import type { LocalAccount } from "@/lib/local-auth-types";
 
 function originIsAllowed(request: NextRequest): boolean {
   const origin = request.headers.get("origin");
@@ -24,7 +25,7 @@ export async function GET() {
   if (user.role !== "admin") return NextResponse.json({ error: "需要管理員權限。" }, { status: 403 });
 
   try {
-    return NextResponse.json({ users: listLocalUsers() });
+    return NextResponse.json({ users: listLocalUsers() satisfies LocalAccount[] });
   } catch (error) {
     console.error("Local user list failed:", error);
     return NextResponse.json({ error: "無法載入帳號清單。" }, { status: 500 });

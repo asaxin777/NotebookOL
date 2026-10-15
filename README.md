@@ -4,7 +4,7 @@
 
 ## 使用下載版（Windows）
 
-Windows 64 位元使用者不必另外安裝 Node.js、npm 或資料庫。從 GitHub 專案的 **Releases** 下載 `NoteIsle-版本-Windows-portable.exe`，直接開啟即可；第一次啟動後，在畫面選擇「建立帳號」。首次註冊的帳號會成為該電腦資料庫的管理員。目前的預覽發行檔尚未數位簽署，Windows 可能顯示 SmartScreen 警告；只執行你信任來源所提供的檔案。
+Windows 64 位元使用者不必另外安裝 Node.js、npm 或資料庫。從 GitHub 專案的 **Releases** 下載 `NoteIsle-版本-Windows-portable.exe`，直接開啟即可；全新資料庫可用預設管理員帳號 `admin`、密碼 `admin` 登入，也可建立一般使用者帳號。目前的預覽發行檔尚未數位簽署，Windows 可能顯示 SmartScreen 警告；只執行你信任來源所提供的檔案。
 
 帳號及筆記保存在目前 Windows 使用者的 `%APPDATA%\NoteIsle\noteisle.sqlite`，不會放進下載檔或專案目錄。移除下載檔不會刪除筆記；要備份時，先關閉紙嶼，再複製 `%APPDATA%\NoteIsle` 資料夾。
 
@@ -19,13 +19,14 @@ npm install
 npm run dev
 ```
 
-開啟 `http://localhost:3000`，選擇「建立帳號」註冊。密碼需 8–128 個字元，伺服器使用 Node.js scrypt 雜湊後才寫入資料庫。第一個建立的帳號會成為管理員，其後註冊的帳號為一般使用者。桌面支援 `Ctrl/Cmd+N` 新增筆記及 `Ctrl/Cmd+K` 搜尋。
+開啟 `http://localhost:3000`，首次啟動會在空白資料庫建立預設管理員，帳號與密碼都是 `admin`。也可以選擇「建立帳號」註冊；新帳號密碼需 8–128 個字元，伺服器使用 Node.js scrypt 雜湊後才寫入資料庫，註冊帳號預設為一般使用者。桌面支援 `Ctrl/Cmd+N` 新增筆記及 `Ctrl/Cmd+K` 搜尋。
 
 SQLite 資料庫預設建立在專案根目錄 `.data/noteisle.sqlite`，該目錄已加入 Git 忽略清單。也可透過 `NOTEISLE_DB_PATH` 指定資料庫檔案位置。停止伺服器後，備份整個 `.data` 目錄即可保留帳號與筆記。
 
 ## 本機帳號與管理員
 
 - 每個帳號只能讀寫自己的筆記與資料夾；伺服器依 HttpOnly session cookie 確認登入者，不接受瀏覽器自行指定帳號 ID。
+- 全新空白資料庫會建立預設管理員（帳號 `admin`、密碼 `admin`）；已經有帳號的資料庫不會新增這組預設憑證。此預設密碼很弱，只能用於本機展示，切勿將服務暴露到公用網路。
 - 管理員可從工作區左下方的「管理員」進入帳號列表，並授予或移除其他帳號的管理員角色。
 - 管理員列表不會顯示筆記內容；至少保留一位管理員，也不能由管理員在介面中變更自己的角色。
 - 管理員權限只在這個本機 SQLite 資料庫內有效；它不是作業系統管理員權限。

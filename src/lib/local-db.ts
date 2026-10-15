@@ -1,11 +1,12 @@
 import "server-only";
 
-import { createHash, randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, randomUUID, scrypt as scryptCallback, scryptSync, timingSafeEqual } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import Database from "better-sqlite3";
 import { cookies } from "next/headers";
+import type { LocalAccount } from "@/lib/local-auth-types";
 import { importWorkspace, type Note, type NoteFolder, type Workspace } from "@/lib/notes";
 
 const scrypt = promisify(scryptCallback);
@@ -127,6 +128,20 @@ function getDatabase(): Database.Database {
     create index if not exists notes_owner_updated_idx
       on notes(owner_id, updated_at desc);
   `);
+  const userCount = database.prepare("select count(*) as count from users").get() as { count: number };
+  if (userCount.count === 0) {
+    const salt = randomBytes(16);
+    const hash = scryptSync("admin", salt, PASSWORD_HASH_BYTES);
+    database
+      .prepare("insert into users (id, email, password_hash, role, created_at) values (?, ?, ?, ?, ?)")
+      .run(
+        randomUUID(),
+        "admin",
+        `${salt.toString("hex")}:${hash.toString("hex")}`,
+        "admin",
+        new Date().toISOString(),
+      );
+  }
   globalThis.noteIsleDatabase = database;
   return database;
 }
@@ -380,10 +395,16 @@ export function writeLocalWorkspace(userId: string, payload: unknown): void {
   save();
 }
 
-export function listLocalUsers(): AccountRow[] {
-  return getDatabase()
+export function listLocalUsers(): LocalAccount[] {
+  const rows = getDatabase()
     .prepare("select id, email, role, created_at from users order by created_at, id")
     .all() as AccountRow[];
+  return rows.map((row) => ({
+    id: row.id,
+    email: row.email,
+    role: row.role,
+    createdAt: row.created_at,
+  }));
 }
 
 export function updateLocalUserRole(userId: string, targetUserId: string, role: unknown): void {
